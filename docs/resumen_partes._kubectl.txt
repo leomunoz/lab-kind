@@ -175,4 +175,49 @@ kube-controller-manager
 Corrige diferencias entre estado real y deseado
 
 
+******************************************************************************
 
+Un ejercicio muy bueno para tu laboratorio
+
+Ahora que tienes nginx funcionando:
+
+Abre dos terminales.
+
+Terminal 1:
+
+Shell
+kubectl get pods -w
+
+Terminal 2:
+
+Shell
+kubectl delete pod <nombre-del-pod>
+
+Observa qué ocurre.
+
+Verás algo parecido a:
+
+Plain Text
+Terminating
+
+y poco después:
+
+Plain Text
+Running
+
+con otro nombre.
+
+leomr@Casa:~/repos/lab-kind (development)$ kubectl delete pod nginx-69b9cdbbdd-db867
+pod "nginx-69b9cdbbdd-db867" deleted from testleo namespace
+leomr@Casa:~/repos/lab-kind (development)$ kubectl get pod 
+NAME                     READY   STATUS              RESTARTS   AGE
+nginx-69b9cdbbdd-rl6vq   0/1     ContainerCreating   0          3s
+
+leomr@Casa:~/repos/lab-kind (development)$ kubectl get pod 
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-69b9cdbbdd-rl6vq   1/1     Running   0          20s
+
+
+En ese momento estarás viendo trabajar al Controller Manager, al Scheduler y al API Server colaborando para devolver el clúster al estado deseado.
+
+Y ahí suele producirse el segundo gran "clic" mental después de entender que un nodo Kind es realmente un contenedor Docker.
