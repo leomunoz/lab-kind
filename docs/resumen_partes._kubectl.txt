@@ -1,0 +1,178 @@
+ETCD
+
+Es la base de datos de Kubernetes.
+
+Todo acaba aquí:
+
+Namespaces
+Deployments
+Pods
+Services
+Secrets
+ConfigMaps
+
+Por ejemplo, cuando haces:
+
+kubectl create namespace testleo
+
+Ocurre:
+
+kubectl
+↓
+API Server
+↓
+etcd guarda el namespace
+
+Si perdemos etcd perdemos el estado del cluster.
+
+********************************************************************
+
+kube-apiserver
+
+Es la puerta de entrada del cluster.
+
+Todo pasa por él:
+
+Shell
+kubectl get pods
+kubectl create deployment nginx
+kubectl delete pod ...
+
+Todo.
+
+Cuando tú ejecutas:
+
+Shell
+kubectl get pods
+
+realmente haces:
+
+Plain Text
+kubectl
+↓
+kube-apiserver
+↓
+etcd
+
+Por eso antes, al abrir:
+
+Plain Text
+https://127.0.0.1:41183
+
+en el navegador, obtuviste:
+
+JSON
+403 Forbidden
+
+porque estabas hablando directamente con el API Server sin autenticarte.
+
+*********************************************************************************
+
+kube-scheduler
+
+Es el que decide:
+
+"¿En qué nodo va este pod?"
+
+Imagina que tienes:
+
+Plain Text
+worker-1
+worker-2
+worker-3
+
+Creas:
+
+Shell
+kubectl create deployment nginx --replicas=3
+
+El scheduler mira:
+
+CPU disponible
+Memoria disponible
+Labels
+Taints
+Affinity
+
+Y toma decisiones:
+
+Plain Text
+pod-1 → worker-1
+pod-2 → worker-3
+pod-3 → worker-2
+
+No crea pods.
+
+Solo decide dónde deben ejecutarse.
+
+*****************************************************************************
+
+kube-controller-manager
+
+Aquí suele estar la pieza menos entendida.
+
+Su misión es vigilar continuamente:
+
+Plain Text
+Estado deseado
+VS
+Estado real
+
+Ejemplo:
+
+Tú declaras:
+
+YAML
+replicas: 3
+
+Pero solo hay:
+
+Plain Text
+2 pods running
+
+Entonces el Controller Manager detecta:
+
+Plain Text
+Deseado: 3
+Real: 2
+
+y ordena crear otro pod.
+
+Otro ejemplo:
+
+Plain Text
+Nodo caído
+
+Detecta:
+
+Plain Text
+El pod ya no existe
+
+e intenta recrearlo.
+
+Por eso se suele decir:
+
+El Controller Manager mantiene el cluster en el estado deseado.
+
+***************************************************************************
+
+Resumen ultrasimplificado
+Plain Text
+etcd
+↓
+Almacena todo
+Plain Text
+kube-apiserver
+↓
+Recibe todas las peticiones
+Plain Text
+kube-scheduler
+↓
+Decide dónde ejecutar pods
+Plain Text
+kube-controller-manager
+↓
+Corrige diferencias entre estado real y deseado
+
+
+
